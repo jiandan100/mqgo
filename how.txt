@@ -1,0 +1,49 @@
+mq:
+  ucenter:
+    dsn: amqp://admin:admin@172.16.0.215:5672/ucenter
+    reconnect_delay: 5s
+    consumers:
+      - name: pwdnotify
+        queue: user.create.pwdnotify
+        workers: 1
+        prefetch_count: 0
+        prefetch_size: 0
+        options:
+          no_ack: true
+          no_local: false
+          no_wait: false
+          exclusive: false
+  sms:
+    dsn: amqp://admin:admin@172.16.0.215:5672/sms
+    reconnect_delay: 5s
+    producers:
+      - name: sms-send
+        exchange: sms.topic
+        routing_key: sms.send
+        buffer_size: 10
+        options:
+          content_type: application/json
+          delivery_mode: 2  # 2 - non persistent, 2 - persistent
+
+/*
+
+  mqueue.Use("ucenter").SetConsumerHandler("pwdnotify", ConsumerHandler)
+
+  func ConsumerHandler(message []byte) (manualAck bool){
+  return false 自动应答（配置文件设置no_ack true). 或者不应答
+  return true 手动应答
+}
+
+route := fmt.Sprintf("user.create.%d.%s", source, flag)
+p, err := mqueue.Use("ucenter").GetProducer("useropt")
+if err != nil {
+	log.Error(fmt.Sprintf("send reg mq:%s",err))
+	return false
+}
+data := mqueue.PublicData{
+			Message:[]byte("ssssss"),
+			RouteKey: "",  //使用默认路由键的话该值使用  ""
+			Delay: 333, //延迟时间
+		}
+		p.Produce(data)
+*/
